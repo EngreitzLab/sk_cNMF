@@ -1,5 +1,18 @@
 # Consensus NMF (cNMF)
 
+Alexandra's notes on modified sklearn cNMF: 
+* This is a fork from the original cNMF repo, because the original one only does:
+	* mu with kl divergence loss
+	* cd with Frobenius loss
+* new sk cNMF adds an additional argument 'algo' for cnmf prepare() and allows:
+	* mu with kl divergence 
+	* mu with Frobenius loss
+	* cd with kl divergence
+	* cd with Frobenius loss
+
+To use, simply git clone the repo, cd to the repo, and in the terminal type: pip install -e.
+
+
 <img src="https://storage.googleapis.com/sabeti-public/dkotliar/elife-cNMF-fig1.jpg" style="height: 800px;" />
 
 cNMF is a pipeline for inferring gene expression programs from scRNA-Seq. It takes a count matrix (N cells X G genes) as input and produces a (K x G) matrix of gene expression programs (GEPs) and a (N x K) matrix specifying the usage of each program for each cell in the data. Read more about the method in the [publication](https://elifesciences.org/articles/43803) and check out examples on [simulated data](Tutorials/analyze_simulated_example_data.ipynb) and [PBMCs](Tutorials/analyze_pbmc_example_data.ipynb).
