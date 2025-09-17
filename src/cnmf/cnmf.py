@@ -331,7 +331,7 @@ class cNMF():
 
 
     def prepare(self, counts_fn, components, n_iter = 100, densify=False, tpm_fn=None, seed=None,
-                        beta_loss='frobenius',algo = 'mu', num_highvar_genes=2000, genes_file=None,
+                        beta_loss='frobenius',algo = 'mu', num_highvar_genes=2000, genes_file=None, tol = 1e-4,
                         alpha_usage=0.0, alpha_spectra=0.0, init='random', max_NMF_iter=1000):
         """
         Load input counts, reduce to high-variance genes, and variance normalize genes.
@@ -455,7 +455,7 @@ class cNMF():
         self.save_norm_counts(norm_counts)
         (replicate_params, run_params) = self.get_nmf_iter_params(ks=components, n_iter=n_iter, random_state_seed=seed,
                                                                   beta_loss=beta_loss, algo = algo, alpha_usage=alpha_usage,
-                                                                  alpha_spectra=alpha_spectra, init=init, max_iter=max_NMF_iter)
+                                                                  alpha_spectra=alpha_spectra, init=init, max_iter=max_NMF_iter, tol = tol)
         self.save_nmf_iter_params(replicate_params, run_params)
         
     
@@ -565,7 +565,7 @@ class cNMF():
                                random_state_seed = None,
                                beta_loss = 'kullback-leibler', algo = 'mu',
                                alpha_usage=0.0, alpha_spectra=0.0,
-                               init='random', max_iter=1000):
+                               init='random', max_iter=1000, tol = 1e-4):
         """
         Create a DataFrame with parameters for NMF iterations.
 
@@ -621,9 +621,9 @@ class cNMF():
                         l1_ratio=0.0,
                         beta_loss=beta_loss,
                         solver=algo, #Alexandra's modification: allow different solver choice
-                        tol=1e-4,
+                        tol=tol,
                         max_iter=max_iter,
-                        init=init
+                        init=init,
                         )
         
         ## Coordinate descent is faster than multiplicative update but only works for frobenius
