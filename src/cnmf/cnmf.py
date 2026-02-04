@@ -332,7 +332,7 @@ class cNMF():
 
     def prepare(self, counts_fn, components, n_iter = 100, densify=False, tpm_fn=None, seed=None,
                         beta_loss='frobenius',algo = 'mu', num_highvar_genes=2000, genes_file=None, tol = 1e-4,
-                        alpha_usage=0.0, alpha_spectra=0.0, init='random', max_NMF_iter=1000):
+                        alpha_usage=0.0, alpha_spectra=0.0, init='random', max_NMF_iter=1000, nmf_seeds = None):
         """
         Load input counts, reduce to high-variance genes, and variance normalize genes.
         Prepare file for distributing jobs over workers.
@@ -401,6 +401,13 @@ class cNMF():
                                        obs=pd.DataFrame(index=input_counts.index),
                                        var=pd.DataFrame(index=input_counts.columns))
 
+
+        #Alexandra's edit to add new methods: 
+        if nmf_seeds is not None: 
+            if len(nmf_seeds) != n_iter:
+                raise ValueError("len of nmf_seeds must equal to number of n_iter ")
+            self.nmf_seeds = nmf_seeds # all NMF seeds can be given as well
+        
                 
         if sp.issparse(input_counts.X) & densify:
             input_counts.X = np.array(input_counts.X.todense())
@@ -431,7 +438,9 @@ class cNMF():
                             var=pd.DataFrame(index=tpm.columns)) 
 
             sc.write(self.paths['tpm'], tpm)
-        
+
+
+
         if sp.issparse(tpm.X):
             gene_tpm_mean, gene_tpm_stddev = get_mean_var(tpm.X)
             gene_tpm_stddev = gene_tpm_stddev**.5
@@ -598,8 +607,11 @@ class cNMF():
 
         n_runs = len(ks)* n_iter
 
-        np.random.seed(seed=random_state_seed)
-        nmf_seeds = np.random.randint(low=1, high=(2**31)-1, size=n_runs)
+        if self.nmf_seeds is None:
+            np.random.seed(seed=random_state_seed)
+            nmf_seeds = np.random.randint(low=1, high=(2**31)-1, size=n_runs)
+        else: 
+            nmf_seeds = self.nmf_seeds
 
         replicate_params = []
         for i, (k, r) in enumerate(itertools.product(k_list, range(n_iter))):
